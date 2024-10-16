@@ -22,7 +22,7 @@ public class HelixController : MonoBehaviour
     {
         startRotation = transform.localEulerAngles;
         helixDistance = topTransform.localPosition.y - (goalTransform.localPosition.y + 0.1f);
-        LoadStage(1);
+        LoadStage(0);
     }
 
     // Update is called once per frame
