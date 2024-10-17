@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Advertisements;
+//using System.Diagnostics;
+//using UnityEditor.Advertisements;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 using UnityEngine.Advertisements;
 
-public class GameManager : MonoBehaviour, IUnityAdsInitializationListener
+public class GameManager : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoadListener, IUnityAdsShowListener
 {
     public int bestScore;
     public int score;
@@ -15,6 +17,7 @@ public class GameManager : MonoBehaviour, IUnityAdsInitializationListener
 
     private HelixController helixController;
     private const string gameId = "5714049";
+    private const string placementId = "Interstitial_Android";
 
     // Start is called before the first frame update
     void Awake()
@@ -49,7 +52,22 @@ public class GameManager : MonoBehaviour, IUnityAdsInitializationListener
         else
         {
             Debug.Log("Ads already initialised");
+            LoadAd();
         }
+    }
+
+    public void LoadAd()
+    {
+        // IMPORTANT! Only load content AFTER initialization
+        Debug.Log("Loading Ad: " + gameId);
+        Advertisement.Load(placementId, this);
+    }
+
+    // Show the loaded content in the Ad Unit:
+    public void ShowAd()
+    {
+        Debug.Log("Showing Ad: " + gameId);
+        Advertisement.Show(placementId, this);
     }
 
     public void NextLevel()
@@ -68,9 +86,10 @@ public class GameManager : MonoBehaviour, IUnityAdsInitializationListener
     public void RestartLevel()
     {
         Debug.Log("Game Over");
-        InitializeAds();
+        //InitializeAds();
+
         //Show ads
-        Advertisement.Show("Interstitial_Android");
+        ShowAd();
         singleton.score = 0;
         FindObjectOfType<BallController>().ResetBall();
         // Reload stage
@@ -93,11 +112,47 @@ public class GameManager : MonoBehaviour, IUnityAdsInitializationListener
     {
         //throw new System.NotImplementedException();
         Debug.Log("Unity Ads Initialization Complete.");
+        LoadAd();
     }
 
     public void OnInitializationFailed(UnityAdsInitializationError error, string message)
     {
         //throw new System.NotImplementedException();
         Debug.LogError($"Unity Ads Initialization Failed: {error.ToString()} - {message}");
+    }
+
+    public void OnUnityAdsAdLoaded(string placementId)
+    {
+        //throw new System.NotImplementedException();
+    }
+
+    public void OnUnityAdsFailedToLoad(string placementId, UnityAdsLoadError error, string message)
+    {
+        //throw new System.NotImplementedException();
+        Debug.LogError($"Error loading Ad Unit: {placementId} - {error.ToString()} - {message}");
+    }
+
+    public void OnUnityAdsShowFailure(string placementId, UnityAdsShowError error, string message)
+    {
+        //throw new System.NotImplementedException();
+        Debug.LogError($"Error showing Ad Unit {placementId}: {error.ToString()} - {message}");
+    }
+
+    public void OnUnityAdsShowStart(string placementId)
+    {
+        //throw new System.NotImplementedException();
+        Debug.Log("Ad started showing.");
+    }
+
+    public void OnUnityAdsShowClick(string placementId)
+    {
+        //throw new System.NotImplementedException();
+        Debug.Log("Ad clicked.");
+    }
+
+    public void OnUnityAdsShowComplete(string placementId, UnityAdsShowCompletionState showCompletionState)
+    {
+        //throw new System.NotImplementedException();
+        Debug.Log("Ad completed.");
     }
 }
