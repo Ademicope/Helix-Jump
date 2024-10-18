@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using UnityEngine.Advertisements;
+using TMPro;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoadListener, IUnityAdsShowListener
 {
@@ -15,7 +17,11 @@ public class GameManager : MonoBehaviour, IUnityAdsInitializationListener, IUnit
 
     public static GameManager singleton;
 
+    public GameObject leaderboardScreen;
+    public TMP_InputField playerUsername;
+
     private HelixController helixController;
+    private Leaderboard leaderboard;
     private const string gameId = "5714049";
     private const string placementId = "Interstitial_Android";
 
@@ -23,6 +29,7 @@ public class GameManager : MonoBehaviour, IUnityAdsInitializationListener, IUnit
     void Awake()
     {
         helixController = FindObjectOfType<HelixController>();
+        leaderboard = GetComponent<Leaderboard>();
 
         if (singleton == null)
         {
@@ -34,7 +41,7 @@ public class GameManager : MonoBehaviour, IUnityAdsInitializationListener, IUnit
             Destroy(gameObject);
         }
 
-        bestScore = PlayerPrefs.GetInt("Highscore ");
+        bestScore = PlayerPrefs.GetInt("Highscore");
     }
 
     // Update is called once per frame
@@ -67,6 +74,8 @@ public class GameManager : MonoBehaviour, IUnityAdsInitializationListener, IUnit
     public void ShowAd()
     {
         Debug.Log("Showing Ad: " + gameId);
+
+        Time.timeScale = 0;
         Advertisement.Show(placementId, this);
     }
 
@@ -86,6 +95,7 @@ public class GameManager : MonoBehaviour, IUnityAdsInitializationListener, IUnit
     public void RestartLevel()
     {
         Debug.Log("Game Over");
+        
         //InitializeAds();
 
         //Show ads
@@ -154,5 +164,24 @@ public class GameManager : MonoBehaviour, IUnityAdsInitializationListener, IUnit
     {
         //throw new System.NotImplementedException();
         Debug.Log("Ad completed.");
+        leaderboardScreen.gameObject.SetActive(true);
+
+        StartCoroutine(WaitForLeaderboardToClose());
+    }
+
+    IEnumerator WaitForLeaderboardToClose()
+    {
+        // Assuming the leaderboard is closed when the screen is set inactive
+        yield return new WaitUntil(() => !leaderboardScreen.activeSelf);
+
+        // Resume the game once the leaderboard is closed
+        Time.timeScale = 1;
+    }
+
+    public void UpdateLeaderboard(string username, int score)
+    {
+        score = bestScore;
+        username = playerUsername.text;
+        leaderboard.SetLeaderboardEntry(username, score);
     }
 }
