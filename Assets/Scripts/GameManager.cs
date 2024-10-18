@@ -18,10 +18,11 @@ public class GameManager : MonoBehaviour, IUnityAdsInitializationListener, IUnit
     public static GameManager singleton;
 
     public GameObject leaderboardScreen;
-    public TMP_InputField playerUsername;
+    public Button continueButton;
+    //public TMP_InputField playerUsername;
 
     private HelixController helixController;
-    private Leaderboard leaderboard;
+    //private Leaderboard leaderboard;
     private const string gameId = "5714049";
     private const string placementId = "Interstitial_Android";
 
@@ -29,7 +30,7 @@ public class GameManager : MonoBehaviour, IUnityAdsInitializationListener, IUnit
     void Awake()
     {
         helixController = FindObjectOfType<HelixController>();
-        leaderboard = GetComponent<Leaderboard>();
+        //leaderboard = GetComponent<Leaderboard>();
 
         if (singleton == null)
         {
@@ -100,8 +101,9 @@ public class GameManager : MonoBehaviour, IUnityAdsInitializationListener, IUnit
 
         //Show ads
         ShowAd();
-        singleton.score = 0;
+        
         FindObjectOfType<BallController>().ResetBall();
+        singleton.score = 0;
         // Reload stage
         FindObjectOfType<HelixController>().LoadStage(currentStage);
     }
@@ -174,14 +176,13 @@ public class GameManager : MonoBehaviour, IUnityAdsInitializationListener, IUnit
         // Assuming the leaderboard is closed when the screen is set inactive
         yield return new WaitUntil(() => !leaderboardScreen.activeSelf);
 
-        // Resume the game once the leaderboard is closed
-        Time.timeScale = 1;
+        ContinueGame();
     }
 
-    public void UpdateLeaderboard(string username, int score)
+    public void ContinueGame()
     {
-        score = bestScore;
-        username = playerUsername.text;
-        leaderboard.SetLeaderboardEntry(username, score);
+        leaderboardScreen.gameObject.SetActive(false);
+        // Resume the game once the leaderboard is closed
+        Time.timeScale = 1;
     }
 }
